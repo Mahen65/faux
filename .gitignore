@@ -1,14 +1,14 @@
-# Dependencies
-node_modules/
-.venv/
-venv/
+# Python
 __pycache__/
 *.pyc
 *.pyo
-
-# Build outputs
-extension/dist/
 *.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+extension/dist/
 
 # IDE
 .vscode/
@@ -19,14 +19,19 @@ extension/dist/
 # OS
 .DS_Store
 Thumbs.db
+Desktop.ini
 
 # Environment
 .env
 .env.local
+.env.*.local
 
 # Database
 *.db
 *.sqlite3
+
+# Docker
+formbot_pgdata/
 
 # Logs
 *.log
@@ -35,3 +40,6 @@ Thumbs.db
 coverage/
 htmlcov/
 .coverage
+
+# Claude
+.claude/
