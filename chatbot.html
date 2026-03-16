@@ -1,0 +1,942 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AudiologyBot — Test UI</title>
+<style>
+  :root {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --border: #d1dce8;
+    --primary: #1a6fb5;
+    --primary-dark: #145a96;
+    --bot-bg: #e8f0fb;
+    --user-bg: #1a6fb5;
+    --user-text: #ffffff;
+    --text: #1e2a38;
+    --muted: #6b7d91;
+    --success: #0f7d52;
+    --success-bg: #e6f5ee;
+    --warn-bg: #fff7e0;
+    --warn: #b07d00;
+    --danger-bg: #fde8e8;
+    --danger: #c0392b;
+    --radius: 10px;
+    --shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: 'Segoe UI', system-ui, sans-serif; color: var(--text); font-size: 14px; }
+
+  /* ── Header ─────────────────────────────── */
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 0 20px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 17px; font-weight: 600; letter-spacing: .3px; }
+  header h1 span { opacity: .6; font-weight: 400; margin-left: 8px; font-size: 13px; }
+  /* ── Layout ─────────────────────────────── */
+  .layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 16px;
+    padding: 16px;
+    height: calc(100vh - 52px);
+  }
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; height: auto; }
+  }
+
+  /* ── Panel ───────────────────────────────── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-body { padding: 16px; flex: 1; overflow-y: auto; }
+
+  /* ── Audiogram Panel ─────────────────────── */
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .preset-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--bg);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--text);
+  }
+  .preset-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  /* ── Patient Info Fields ─────────────────── */
+  .patient-fields {
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .patient-row {
+    display: flex;
+    gap: 8px;
+  }
+  .patient-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .patient-field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .patient-field input[type=text],
+  .patient-field input[type=number] {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .patient-field input[type=text]:focus,
+  .patient-field input[type=number]:focus { border-color: var(--primary); background: var(--surface); }
+
+  .audiogram-grid {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .audiogram-grid th {
+    background: var(--bg);
+    padding: 7px 8px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .audiogram-grid th.ear-right { color: #c0392b; }
+  .audiogram-grid th.ear-left  { color: #1a6fb5; }
+  .audiogram-grid td {
+    padding: 5px 6px;
+    text-align: center;
+    border-bottom: 1px solid var(--bg);
+  }
+  .audiogram-grid td:first-child { font-weight: 600; color: var(--muted); font-size: 12px; width: 52px; }
+  .audiogram-grid input[type=number] {
+    width: 58px;
+    padding: 5px 6px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .audiogram-grid input[type=number]:focus { border-color: var(--primary); }
+  .audiogram-grid input.right-ear:focus { border-color: #c0392b; }
+  .audiogram-grid input.left-ear:focus  { border-color: #1a6fb5; }
+
+  .pta-row { display: flex; gap: 12px; margin-bottom: 16px; }
+  .pta-box {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+  .pta-box.right { background: #fde8e8; border: 1px solid #f5c6c6; }
+  .pta-box.left  { background: #e8f0fb; border: 1px solid #b8d0f0; }
+  .pta-box .pta-label { color: var(--muted); margin-bottom: 2px; }
+  .pta-box .pta-value { font-size: 16px; font-weight: 700; }
+  .pta-box.right .pta-value { color: #c0392b; }
+  .pta-box.left  .pta-value { color: #1a6fb5; }
+  .pta-box .pta-sev { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  .start-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .start-btn:hover { background: var(--primary-dark); }
+  .start-btn:disabled { background: var(--border); color: var(--muted); cursor: default; }
+
+  .reset-btn {
+    padding: 5px 12px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .reset-btn:hover { background: var(--bg); color: var(--text); }
+
+  /* ── Chat Panel ──────────────────────────── */
+  .chat-panel { display: flex; flex-direction: column; }
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 200px;
+  }
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--muted);
+    gap: 8px;
+  }
+  .empty-state svg { opacity: .3; }
+  .empty-state p { font-size: 13px; }
+
+  .msg { display: flex; gap: 8px; max-width: 85%; }
+  .msg.bot  { align-self: flex-start; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .msg.bot  .msg-avatar { background: var(--bot-bg); }
+  .msg.user .msg-avatar { background: var(--user-bg); }
+  .msg-bubble {
+    padding: 9px 13px;
+    border-radius: 14px;
+    line-height: 1.5;
+    font-size: 13.5px;
+  }
+  .msg.bot  .msg-bubble { background: var(--bot-bg); border-bottom-left-radius: 4px; }
+  .msg.user .msg-bubble { background: var(--user-bg); color: var(--user-text); border-bottom-right-radius: 4px; }
+
+  /* ── Assessment Card ─────────────────────── */
+  .assessment-card {
+    margin: 12px 16px 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: none;
+  }
+  .assessment-card.visible { display: block; }
+  .assessment-header {
+    background: var(--success-bg);
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--success);
+    border-bottom: 1px solid #c3e8d8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .assessment-body { padding: 14px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .assessment-body { grid-template-columns: 1fr; } }
+  .assessment-field { }
+  .assessment-field.full { grid-column: 1 / -1; }
+  .field-label { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+  .field-value { font-size: 13.5px; line-height: 1.5; color: var(--text); }
+  .severity-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .sev-Normal           { background: #e6f5ee; color: #0f7d52; }
+  .sev-Mild             { background: #fff7e0; color: #b07d00; }
+  .sev-Moderate         { background: #fff0d6; color: #a85c00; }
+  .sev-Moderately-Severe{ background: #fde8e8; color: #c0392b; }
+  .sev-Severe           { background: #f5d5d5; color: #8b0000; }
+  .sev-Profound         { background: #e8d0d0; color: #6b0000; }
+  .sev-Complete         { background: #2d0000; color: #ffffff; }
+
+  .flags-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .flag {
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .flag.true  { background: var(--danger-bg); color: var(--danger); }
+  .flag.false { background: var(--bg); color: var(--muted); text-decoration: line-through; }
+
+  /* ── Chat input ──────────────────────────── */
+  .chat-input-row {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .chat-input-row textarea {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    min-height: 38px;
+    max-height: 100px;
+    line-height: 1.4;
+    transition: border-color .15s;
+  }
+  .chat-input-row textarea:focus { border-color: var(--primary); }
+  .chat-input-row textarea:disabled { background: var(--bg); }
+  .send-btn {
+    padding: 8px 16px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    height: 38px;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  .send-btn:hover { background: var(--primary-dark); }
+  .send-btn:disabled { background: var(--border); color: var(--muted); cursor: default; }
+
+  /* ── Mic button (STT) ────────────────────── */
+  .mic-btn {
+    padding: 8px 10px;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    height: 38px;
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .mic-btn:hover { background: var(--bot-bg); color: var(--primary); border-color: var(--primary); }
+  .mic-btn:disabled { opacity: .4; cursor: default; }
+  .mic-btn.recording {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-color: var(--danger);
+    animation: mic-pulse 1s infinite;
+  }
+  @keyframes mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(192,57,43,.4); }
+    50%       { box-shadow: 0 0 0 6px rgba(192,57,43,0); }
+  }
+
+  /* ── Spinner / error ─────────────────────── */
+  .typing { display: flex; gap: 4px; padding: 12px 13px; }
+  .typing span {
+    width: 7px; height: 7px;
+    background: var(--muted);
+    border-radius: 50%;
+    animation: bounce .9s infinite ease-in-out;
+  }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes bounce {
+    0%,80%,100% { transform: translateY(0); }
+    40%         { transform: translateY(-6px); }
+  }
+  .error-toast {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid #f5c6c6;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin: 0 16px 8px;
+    display: none;
+  }
+  .error-toast.visible { display: block; }
+
+  /* ── TTS ─────────────────────────────────── */
+  .tts-toggle {
+    padding: 3px 10px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: inherit;
+  }
+  .tts-toggle:hover { background: var(--bg); color: var(--text); }
+  .tts-toggle.active { background: var(--bot-bg); color: var(--primary); border-color: var(--primary); }
+  .msg-actions { display: flex; align-items: flex-end; padding-bottom: 4px; }
+  .speak-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity .15s;
+    line-height: 1;
+  }
+  .msg:hover .speak-btn { opacity: 0.4; }
+  .speak-btn:hover { opacity: 1 !important; }
+  .speak-btn.speaking { opacity: 1 !important; animation: tts-pulse 1s infinite; }
+  @keyframes tts-pulse {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.25); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎧 AudiologyBot <span>Test Interface</span></h1>
+</header>
+
+<div class="layout">
+
+  <!-- ── Left: Audiogram Input ────────────── -->
+  <div class="panel">
+    <div class="panel-header">
+      Audiogram Input
+      <button class="reset-btn" id="resetBtn" onclick="resetSession()">↺ Reset</button>
+    </div>
+    <div class="panel-body">
+
+      <div class="presets">
+        <span style="font-size:11px;color:var(--muted);align-self:center;margin-right:2px;">Presets:</span>
+        <button class="preset-btn" onclick="applyPreset('normal')">Normal</button>
+        <button class="preset-btn" onclick="applyPreset('conductive')">Conductive</button>
+        <button class="preset-btn" onclick="applyPreset('highfreq')">High Freq</button>
+        <button class="preset-btn" onclick="applyPreset('severe')">Severe</button>
+      </div>
+
+      <div class="patient-fields">
+        <div class="patient-row">
+          <div class="patient-field">
+            <label for="patientName">Patient Name</label>
+            <input type="text" id="patientName" placeholder="Optional">
+          </div>
+          <div class="patient-field">
+            <label for="patientId">Patient ID</label>
+            <input type="text" id="patientId" placeholder="Optional">
+          </div>
+        </div>
+        <div class="patient-row">
+          <div class="patient-field">
+            <label for="patientAge">Age</label>
+            <input type="number" id="patientAge" placeholder="Optional" min="0" max="120">
+          </div>
+          <div class="patient-field">
+            <label for="testDate">Test Date</label>
+            <input type="text" id="testDate" placeholder="e.g. 2026-03-09">
+          </div>
+        </div>
+      </div>
+
+      <table class="audiogram-grid" id="audiogramTable">
+        <thead>
+          <tr>
+            <th>Hz</th>
+            <th class="ear-right">Right ○</th>
+            <th class="ear-left">Left ×</th>
+          </tr>
+        </thead>
+        <tbody id="audiogramBody"></tbody>
+      </table>
+
+      <div class="pta-row">
+        <div class="pta-box right">
+          <div class="pta-label">Right PTA</div>
+          <div class="pta-value" id="ptaRight">—</div>
+          <div class="pta-sev" id="sevRight"></div>
+        </div>
+        <div class="pta-box left">
+          <div class="pta-label">Left PTA</div>
+          <div class="pta-value" id="ptaLeft">—</div>
+          <div class="pta-sev" id="sevLeft"></div>
+        </div>
+      </div>
+
+      <button class="start-btn" id="startBtn" onclick="startSession()">Start Session</button>
+    </div>
+  </div>
+
+  <!-- ── Right: Chat ───────────────────────── -->
+  <div class="panel chat-panel">
+    <div class="panel-header">
+      Chat
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="tts-toggle" id="ttsToggle" onclick="toggleAutoSpeak()" title="Automatically speak bot messages">🔊 Auto-speak</button>
+        <span id="sessionInfo" style="font-size:11px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0"></span>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="empty-state" id="emptyState">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+          <path d="M8 12h8M12 8v8"/>
+        </svg>
+        <p>Fill in the audiogram and click <strong>Start Session</strong></p>
+      </div>
+    </div>
+
+    <div class="assessment-card" id="assessmentCard">
+      <div class="assessment-header">✓ Assessment Complete</div>
+      <div class="assessment-body" id="assessmentBody"></div>
+    </div>
+
+    <div class="error-toast" id="errorToast"></div>
+
+    <div class="chat-input-row">
+      <textarea
+        id="answerInput"
+        placeholder="Type your answer…"
+        rows="1"
+        disabled
+        onkeydown="onInputKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()" disabled title="Speak your answer">🎤</button>
+      <button class="send-btn" id="sendBtn" onclick="sendReply()" disabled>Send</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────
+const FREQS = [125, 250, 500, 1000, 2000, 4000, 8000];
+const FREQ_LABELS = ['125', '250', '500', '1k', '2k', '4k', '8k'];
+
+const PRESETS = {
+  normal:     { r: [10,10,10,10,10,10,10], l: [10,10,10,10,10,10,10] },
+  conductive: { r: [30,25,20,15,10,10,10], l: [35,30,25,20,10,10,10] },
+  highfreq:   { r: [5,5,5,5,20,35,40],  l: [5,5,5,10,25,35,45]  },
+  severe:     { r: [60,65,70,70,75,80,80], l: [55,60,65,70,75,75,80] },
+};
+
+const API_BASE = 'https://audiology-bot-api-dev.nicehill-3a5e5c87.southeastasia.azurecontainerapps.io';
+let state = { sessionId: null, isComplete: false };
+let ttsEnabled = false;
+
+// ── Init ────────────────────────────────────────────────────────────
+function buildTable() {
+  const tbody = document.getElementById('audiogramBody');
+  tbody.innerHTML = '';
+  FREQS.forEach((f, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${FREQ_LABELS[i]}</td>
+      <td><input type="number" class="right-ear" id="r${f}" min="-10" max="120" value="0" oninput="updatePTA()"></td>
+      <td><input type="number" class="left-ear"  id="l${f}" min="-10" max="120" value="0" oninput="updatePTA()"></td>`;
+    tbody.appendChild(tr);
+  });
+  applyPreset('normal');
+}
+
+function applyPreset(name) {
+  const p = PRESETS[name];
+  FREQS.forEach((f, i) => {
+    document.getElementById(`r${f}`).value = p.r[i];
+    document.getElementById(`l${f}`).value = p.l[i];
+  });
+  updatePTA();
+}
+
+function getAudiogram() {
+  const keys = ['hz125','hz250','hz500','hz1000','hz2000','hz4000','hz8000'];
+  const right = {}, left = {};
+  FREQS.forEach((f, i) => {
+    right[keys[i]] = parseInt(document.getElementById(`r${f}`).value) || 0;
+    left[keys[i]]  = parseInt(document.getElementById(`l${f}`).value) || 0;
+  });
+  return { right_ear: right, left_ear: left };
+}
+
+function calcPTA(ear) {
+  const k = ear;
+  return (k.hz500 + k.hz1000 + k.hz2000 + k.hz4000) / 4;
+}
+
+function severityLabel(pta) {
+  if (pta <= 20) return 'Normal';
+  if (pta <= 35) return 'Mild';
+  if (pta <= 50) return 'Moderate';
+  if (pta <= 65) return 'Moderately Severe';
+  if (pta <= 80) return 'Severe';
+  if (pta <= 94) return 'Profound';
+  return 'Complete';
+}
+
+function updatePTA() {
+  const ag = getAudiogram();
+  const ptaR = calcPTA(ag.right_ear);
+  const ptaL = calcPTA(ag.left_ear);
+  document.getElementById('ptaRight').textContent = ptaR.toFixed(1) + ' dB';
+  document.getElementById('ptaLeft').textContent  = ptaL.toFixed(1) + ' dB';
+  document.getElementById('sevRight').textContent = severityLabel(ptaR);
+  document.getElementById('sevLeft').textContent  = severityLabel(ptaL);
+}
+
+// ── Chat helpers ────────────────────────────────────────────────────
+function addMessage(role, text) {
+  const messages = document.getElementById('messages');
+  document.getElementById('emptyState')?.remove();
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const avatar = role === 'bot' ? '🎧' : '👤';
+
+  if (role === 'bot') {
+    div.innerHTML = `
+      <div class="msg-avatar">${avatar}</div>
+      <div class="msg-bubble">${escHtml(text)}</div>
+      <div class="msg-actions"><button class="speak-btn" title="Speak" onclick="speakText(${JSON.stringify(text)}, this)">🔊</button></div>`;
+    if (ttsEnabled) {
+      setTimeout(() => speakText(text, div.querySelector('.speak-btn')), 150);
+    }
+  } else {
+    div.innerHTML = `
+      <div class="msg-avatar">${avatar}</div>
+      <div class="msg-bubble">${escHtml(text)}</div>`;
+  }
+
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const messages = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.id = 'typingIndicator';
+  div.innerHTML = `<div class="msg-avatar">🎧</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function hideTyping() {
+  document.getElementById('typingIndicator')?.remove();
+}
+
+function showError(msg) {
+  const t = document.getElementById('errorToast');
+  t.textContent = '⚠ ' + msg;
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 5000);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setInputEnabled(enabled) {
+  document.getElementById('answerInput').disabled = !enabled;
+  document.getElementById('sendBtn').disabled = !enabled;
+  document.getElementById('micBtn').disabled = !enabled;
+  if (!enabled && sttActive) recognition?.stop();
+  if (enabled) document.getElementById('answerInput').focus();
+}
+
+// ── Session ─────────────────────────────────────────────────────────
+async function startSession() {
+  if (state.sessionId && !state.isComplete) return;
+
+  const btn = document.getElementById('startBtn');
+  btn.disabled = true;
+  btn.textContent = 'Starting…';
+  document.getElementById('assessmentCard').classList.remove('visible');
+  document.getElementById('messages').innerHTML = '';
+
+  showTyping();
+
+  try {
+    const ag = getAudiogram();
+    const patientName = document.getElementById('patientName').value || null;
+    const body = {
+      audiogram: ag,
+      patient: {
+        patient_name: patientName,
+        patient_id:   document.getElementById('patientId').value   || null,
+        age:          parseInt(document.getElementById('patientAge').value) || null,
+        test_date:    document.getElementById('testDate').value     || null,
+        standard:     'WHO 2021'
+      }
+    };
+    const res = await fetch(`${API_BASE}/api/chat/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+
+    state.sessionId  = data.session_id;
+    state.isComplete = false;
+
+    const pattern  = data.pattern ?? '';
+    const severity = data.severity ?? '';
+    const flags    = (data.flags ?? []).join(', ');
+
+    hideTyping();
+    addMessage('bot',
+      `Audiogram analysed — Pattern: ${pattern}, Severity: ${severity}${flags ? '. Flags: ' + flags : ''}.\n\n${data.first_question}`
+    );
+
+    const sessionLabel = patientName
+      ? `${patientName} · ${String(state.sessionId).slice(0,8)}…`
+      : `Session: ${String(state.sessionId).slice(0,8)}…`;
+    document.getElementById('sessionInfo').textContent = sessionLabel;
+    setInputEnabled(true);
+    btn.textContent = 'Session Active';
+  } catch (e) {
+    hideTyping();
+    showError(e.message);
+    btn.disabled = false;
+    btn.textContent = 'Start Session';
+  }
+}
+
+async function sendReply() {
+  const input = document.getElementById('answerInput');
+  const answer = input.value.trim();
+  if (!answer || !state.sessionId) return;
+
+  addMessage('user', answer);
+  input.value = '';
+  autoResize(input);
+  setInputEnabled(false);
+  showTyping();
+
+  try {
+    const body = { session_id: state.sessionId, answer };
+    const res = await fetch(`${API_BASE}/api/chat/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+
+    hideTyping();
+
+    const isComplete = data.is_complete;
+    const nextQ      = data.next_question;
+    const assessment = data.assessment;
+
+    if (isComplete && assessment) {
+      state.isComplete = true;
+      addMessage('bot', 'Assessment complete. Here is my report:');
+      showAssessment(assessment);
+      setInputEnabled(false);
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('startBtn').textContent = 'Start New Session';
+    } else if (nextQ) {
+      addMessage('bot', nextQ);
+      setInputEnabled(true);
+    }
+  } catch (e) {
+    hideTyping();
+    showError(e.message);
+    setInputEnabled(true);
+  }
+}
+
+function showAssessment(a) {
+  const card = document.getElementById('assessmentCard');
+  const body = document.getElementById('assessmentBody');
+
+  const flags = a.flags ?? {};
+  const flagNames = {
+    ear_wax: 'Ear Wax',
+    asymmetric: 'Asymmetric',
+    noise_induced: 'Noise Induced',
+    urgent_referral: 'Urgent Referral',
+  };
+  const flagsHtml = Object.entries(flags).map(([k, v]) =>
+    `<span class="flag ${v}">${flagNames[k] ?? k}</span>`
+  ).join('');
+
+  const sevClass = 'sev-' + (a.severity ?? '').replace(/\s+/g, '-');
+
+  body.innerHTML = `
+    <div class="assessment-field">
+      <div class="field-label">Diagnosis</div>
+      <div class="field-value">${escHtml(a.diagnosis ?? '')}</div>
+    </div>
+    <div class="assessment-field">
+      <div class="field-label">Severity</div>
+      <div class="field-value"><span class="severity-badge ${sevClass}">${escHtml(a.severity ?? '')}</span></div>
+    </div>
+    <div class="assessment-field full">
+      <div class="field-label">Flags</div>
+      <div class="flags-list">${flagsHtml || '<span style="color:var(--muted);font-size:12px">None</span>'}</div>
+    </div>
+    <div class="assessment-field full">
+      <div class="field-label">Recommendation</div>
+      <div class="field-value">${escHtml(a.recommendation ?? '')}</div>
+    </div>`;
+
+  card.classList.add('visible');
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetSession() {
+  state.sessionId  = null;
+  state.isComplete = false;
+  document.getElementById('messages').innerHTML = `
+    <div class="empty-state" id="emptyState">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+        <path d="M8 12h8M12 8v8"/>
+      </svg>
+      <p>Fill in the audiogram and click <strong>Start Session</strong></p>
+    </div>`;
+  document.getElementById('assessmentCard').classList.remove('visible');
+  document.getElementById('sessionInfo').textContent = '';
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('startBtn').textContent = 'Start Session';
+  setInputEnabled(false);
+}
+
+function onInputKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ── TTS ──────────────────────────────────────────────────────────────
+function toggleAutoSpeak() {
+  ttsEnabled = !ttsEnabled;
+  document.getElementById('ttsToggle').classList.toggle('active', ttsEnabled);
+}
+
+function speakText(text, btn) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  if (btn?.classList.contains('speaking')) {
+    btn.classList.remove('speaking');
+    return;
+  }
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.onstart = () => btn?.classList.add('speaking');
+  utt.onend   = () => btn?.classList.remove('speaking');
+  utt.onerror = () => btn?.classList.remove('speaking');
+  window.speechSynthesis.speak(utt);
+}
+
+// ── STT ───────────────────────────────────────────────────────────────
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let sttActive = false;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (e) => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+    const input = document.getElementById('answerInput');
+    input.value = transcript;
+    autoResize(input);
+  };
+
+  recognition.onend = () => {
+    sttActive = false;
+    const btn = document.getElementById('micBtn');
+    btn.classList.remove('recording');
+    btn.title = 'Speak your answer';
+  };
+
+  recognition.onerror = (e) => {
+    sttActive = false;
+    const btn = document.getElementById('micBtn');
+    btn.classList.remove('recording');
+    if (e.error !== 'aborted') showError('Microphone error: ' + e.error);
+  };
+}
+
+function toggleMic() {
+  if (!recognition) { showError('Speech recognition not supported in this browser. Try Chrome or Edge.'); return; }
+  const btn = document.getElementById('micBtn');
+  if (sttActive) {
+    recognition.stop();
+  } else {
+    document.getElementById('answerInput').value = '';
+    recognition.start();
+    sttActive = true;
+    btn.classList.add('recording');
+    btn.title = 'Listening… click to stop';
+  }
+}
+
+// ── Bootstrap ────────────────────────────────────────────────────────
+buildTable();
+</script>
+</body>
+</html>

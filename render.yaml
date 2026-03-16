@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: faux-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: FAUX_DATABASE_URL
+        sync: false  # set manually — use Neon free tier with pgvector
+      - key: FAUX_LLM_API_KEY
+        sync: false
+      - key: FAUX_LLM_PROVIDER
+        value: anthropic
+      - key: FAUX_RAG_ENABLED
+        value: "true"
