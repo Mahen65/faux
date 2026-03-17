@@ -4,7 +4,7 @@
   "description": "AI-powered synthetic data generator — intelligently fill forms with contextual test data",
   "version": "0.1.0",
   "permissions": ["activeTab", "storage", "scripting"],
-  "host_permissions": ["http://localhost:8888/*", "http://localhost:11434/*"],
+  "host_permissions": ["http://localhost:8888/*", "http://localhost:11434/*", "https://faux-backend-126845037111.us-central1.run.app/*"],
   "action": {
     "default_popup": "src/popup/index.html",
     "default_icon": {
