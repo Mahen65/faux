@@ -6,6 +6,11 @@ on:
     paths:
       - 'backend/**'
 
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-central1
+  IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/cloud-run-source-deploy/faux-backend
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,15 +25,32 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      - name: Build with cache
+        run: |
+          docker pull ${{ env.IMAGE }}:latest || true
+          docker build \
+            --cache-from ${{ env.IMAGE }}:latest \
+            -t ${{ env.IMAGE }}:${{ github.sha }} \
+            -t ${{ env.IMAGE }}:latest \
+            ./backend
+
+      - name: Push image
+        run: |
+          docker push ${{ env.IMAGE }}:${{ github.sha }}
+          docker push ${{ env.IMAGE }}:latest
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy faux-backend \
-            --source ./backend \
-            --region us-central1 \
+            --image ${{ env.IMAGE }}:${{ github.sha }} \
+            --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --set-env-vars "FAUX_DATABASE_URL=${{ secrets.FAUX_DATABASE_URL }},FAUX_LLM_PROVIDER=anthropic" \
             --memory 1Gi \
             --cpu 1 \
             --min-instances 0 \
             --max-instances 1 \
-            --project ${{ secrets.GCP_PROJECT_ID }}
+            --project ${{ env.PROJECT_ID }}
