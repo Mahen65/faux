@@ -41,5 +41,8 @@ coverage/
 htmlcov/
 .coverage
 
+# GCP service account key
+key.json
+
 # Claude
 .claude/
