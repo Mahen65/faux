@@ -19,11 +19,14 @@ async def lifespan(app: FastAPI):
     import asyncio
     from sqlalchemy import text
 
-    async with engine.begin() as conn:
-        # Enable pgvector extension (no-op if already enabled)
-        if "postgresql" in settings.database_url:
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            # Enable pgvector extension (no-op if already enabled)
+            if "postgresql" in settings.database_url:
+                await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        logging.error("Database init failed (will retry on first request): %s", e)
 
     # Pre-load embedding model in background to avoid cold-start delay
     if settings.rag_enabled:
