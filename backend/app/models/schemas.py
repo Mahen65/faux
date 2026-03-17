@@ -32,7 +32,7 @@ class ClassifiedField(BaseModel):
 
 
 class AnalyzeRequest(BaseModel):
-    """Request to classify fields and generate data.[changed] """
+    """Request to classify fields and generate data."""
 
     fields: list[FieldDescriptor]
     profile_id: str | None = None
