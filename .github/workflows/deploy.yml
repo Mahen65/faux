@@ -48,7 +48,7 @@ jobs:
             --image ${{ env.IMAGE }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --set-env-vars "FAUX_DATABASE_URL=${{ secrets.FAUX_DATABASE_URL }},FAUX_LLM_PROVIDER=anthropic" \
+            --set-env-vars "FAUX_DATABASE_URL=${{ secrets.FAUX_DATABASE_URL }},FAUX_LLM_PROVIDER=gemini,FAUX_GEMINI_USE_VERTEX=true,FAUX_GCP_PROJECT=${{ env.PROJECT_ID }}" \
             --memory 1Gi \
             --cpu 1 \
             --min-instances 0 \
