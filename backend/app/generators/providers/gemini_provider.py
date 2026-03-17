@@ -33,7 +33,7 @@ class GeminiProvider(LLMProvider):
         else:
             raise ValueError("API key or GCP project required for Gemini")
 
-        self.model = model or "gemini-2.0-flash"
+        self.model = model or os.environ.get("FAUX_GEMINI_MODEL", "gemini-2.5-flash")
 
     def generate(self, system_prompt: str, user_message: str, max_tokens: int = 4096) -> LLMResponse:
         try:
