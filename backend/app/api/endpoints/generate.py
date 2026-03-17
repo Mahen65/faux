@@ -32,12 +32,16 @@ async def generate_form_data(
     instance_id = request.headers.get("x-instance-id")
 
     # RAG: retrieve similar past submissions for context
-    field_summaries = [_build_field_summary(f) for f in body.fields]
-    rag_context = await retrieve_similar_submissions(
-        field_summaries,
-        session=session,
-        persona=body.persona,
-    )
+    rag_context = None
+    try:
+        field_summaries = [_build_field_summary(f) for f in body.fields]
+        rag_context = await retrieve_similar_submissions(
+            field_summaries,
+            session=session,
+            persona=body.persona,
+        )
+    except Exception as e:
+        logger.warning("RAG retrieval failed (continuing without): %s", e)
 
     # Try LLM-powered generation first
     llm_result = generate_with_llm(
@@ -58,21 +62,24 @@ async def generate_form_data(
         )
 
         # Save usage record
-        if instance_id:
-            cost = estimate_cost(
-                llm_response.provider, llm_response.model,
-                llm_response.input_tokens, llm_response.output_tokens,
-            )
-            record = UsageRecord(
-                instance_id=instance_id,
-                provider=llm_response.provider,
-                model=llm_response.model,
-                input_tokens=llm_response.input_tokens,
-                output_tokens=llm_response.output_tokens,
-                estimated_cost=cost,
-            )
-            session.add(record)
-            await session.commit()
+        try:
+            if instance_id:
+                cost = estimate_cost(
+                    llm_response.provider, llm_response.model,
+                    llm_response.input_tokens, llm_response.output_tokens,
+                )
+                record = UsageRecord(
+                    instance_id=instance_id,
+                    provider=llm_response.provider,
+                    model=llm_response.model,
+                    input_tokens=llm_response.input_tokens,
+                    output_tokens=llm_response.output_tokens,
+                    estimated_cost=cost,
+                )
+                session.add(record)
+                await session.commit()
+        except Exception as e:
+            logger.warning("Usage tracking failed (continuing): %s", e)
 
         return AnalyzeResponse(results=results)
 

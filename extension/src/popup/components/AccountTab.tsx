@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'preact/hooks';
-import type { FormbotSettings, UserProfile, UsageSummaryData } from '@shared/types';
+import type { FauxSettings, UserProfile, UsageSummaryData } from '@shared/types';
 import { getSettings, saveSettings } from '@shared/settings';
 import { API_BASE_URL } from '@shared/constants';
 import { ProfileEditor } from './ProfileEditor';
 
 export function AccountTab() {
-  const [settings, setSettings] = useState<FormbotSettings | null>(null);
+  const [settings, setSettings] = useState<FauxSettings | null>(null);
   const [usage, setUsage] = useState<UsageSummaryData | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [editingProfile, setEditingProfile] = useState<UserProfile | null>(null);
@@ -32,7 +32,7 @@ export function AccountTab() {
     }
   }
 
-  async function persistSettings(updated: FormbotSettings) {
+  async function persistSettings(updated: FauxSettings) {
     setSettings(updated);
     await saveSettings(updated);
   }

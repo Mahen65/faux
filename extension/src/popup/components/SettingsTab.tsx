@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'preact/hooks';
-import type { FormbotSettings, LLMProvider } from '@shared/types';
+import type { FauxSettings, LLMProvider } from '@shared/types';
 import { getSettings, saveSettings } from '@shared/settings';
 import { PROVIDER_INFO, API_BASE_URL } from '@shared/constants';
 
 const PROVIDERS = Object.keys(PROVIDER_INFO) as LLMProvider[];
 
 export function SettingsTab() {
-  const [settings, setSettings] = useState<FormbotSettings | null>(null);
+  const [settings, setSettings] = useState<FauxSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);

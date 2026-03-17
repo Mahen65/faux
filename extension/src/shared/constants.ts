@@ -17,10 +17,10 @@ export const INTERACTIVE_SELECTOR = [
 ].join(', ');
 
 /** Backend API base URL */
-export const API_BASE_URL = 'http://localhost:8888/api/v1';
+export const API_BASE_URL = 'https://faux-backend-126845037111.us-central1.run.app/api/v1';
 
-/** Timeout for backend API requests (ms) */
-export const API_TIMEOUT = 15000;
+/** Timeout for backend API requests (ms) — longer for cloud cold starts */
+export const API_TIMEOUT = 30000;
 
 /** Provider metadata for the settings UI */
 export const PROVIDER_INFO = {
