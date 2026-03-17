@@ -13,11 +13,16 @@ class GeminiProvider(LLMProvider):
         except ImportError:
             raise ImportError("Install google-genai: pip install google-genai")
 
-        # Use Vertex AI if running on GCP (no API key needed) or if explicitly configured
+        # Use Vertex AI if explicitly configured (takes priority over API key)
         use_vertex = os.environ.get("FAUX_GEMINI_USE_VERTEX", "").lower() in ("1", "true")
         gcp_project = os.environ.get("FAUX_GCP_PROJECT") or os.environ.get("GOOGLE_CLOUD_PROJECT")
 
-        if use_vertex or (not api_key and gcp_project):
+        if use_vertex and gcp_project:
+            import logging
+            logging.getLogger(__name__).info(
+                "Using Vertex AI: project=%s, location=%s", gcp_project,
+                os.environ.get("FAUX_GCP_REGION", "us-central1"),
+            )
             self.client = genai.Client(
                 vertexai=True,
                 project=gcp_project,
