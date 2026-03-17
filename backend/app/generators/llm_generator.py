@@ -83,7 +83,9 @@ def generate_with_llm(
     provider_name = provider_name or settings.llm_provider or "anthropic"
     api_key = api_key or settings.llm_api_key
 
-    if not api_key and provider_name != "ollama":
+    # Ollama (local) and Gemini (Vertex AI on GCP) don't need API keys
+    skip_key_check = provider_name in ("ollama", "gemini")
+    if not api_key and not skip_key_check:
         logger.info("No API key for provider '%s', skipping LLM", provider_name)
         return None
 
